@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    dynamic:
+      datasource:
+        master:
+          username: root
+          password: 123456
+          url: jdbc:mysql://111.231.11.62:3306/geely2.0?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8
+          driver-class-name: com.mysql.jdbc.Driver
+        slave:
+          username: root
+          password: 123456
+          url: jdbc:mysql://111.231.11.62:3306/geely1.0?useUnicode=true&characterEncoding=UTF-8&useSSL=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8
+          driver-class-name: com.mysql.jdbc.Driver
+      mp-enabled: true
+server:
+  port: 8080
+mybatis-plus:
+  # xml扫描，多个目录用逗号或者分号分隔（告诉 Mapper 所对应的 XML 文件位置）
+  mapper-locations: classpath:mapper/*.xml,classpath:mapper/master/*.xml,classpath:mapper/slave/*.xml
+  type-aliases-package: com.mingcloud.data.entity,com.mingcloud.data.entity.master,com.mingcloud.data.entity.slave
+application:
+  fileName: dataMigration.sql
+  filePath: F:/work/geely/sql/
+  #存储 迁移sql的表
+  recordSqlTable: sys_sql_analysis
+  #filePath: /data/sql/
+#logging:
+#  level:
+#    com.mingcloud.data.mapper: debug
