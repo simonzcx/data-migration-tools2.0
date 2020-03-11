@@ -63,6 +63,7 @@ public class MybatisInterceptor implements Interceptor {
         MappedStatement mappedStatement = (MappedStatement) invocation.getArgs()[0];
         //获取当前SQL命令类型
         SqlCommandType commandType = mappedStatement.getSqlCommandType();
+
         Object parameter = null;
         // 获取参数，if语句成立，表示sql语句有参数，参数格式是map形式
         if (invocation.getArgs().length > 1) {
