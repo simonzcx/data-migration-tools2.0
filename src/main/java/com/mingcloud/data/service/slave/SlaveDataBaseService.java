@@ -25,6 +25,6 @@ public interface SlaveDataBaseService extends IService<DataBaseEntity> {
      * @author simon
      * @date 2020/03/09
      */
-    String selectDatabaseNameByMySQL() throws IOException;
+    /*String selectDatabaseNameByMySQL() throws IOException;*/
 
 }

@@ -2,14 +2,14 @@ package com.mingcloud.data.mapper;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.mingcloud.data.DataMigrationToolsApplicationTests;
+import com.mingcloud.data.config.DataBaseConfig;
 import com.mingcloud.data.dto.TableDto;
 import com.mingcloud.data.entity.DataBaseEntity;
-import com.mingcloud.data.service.master.MasterDataBaseService;
-import com.mingcloud.data.service.slave.SlaveDataBaseService;
-import com.mingcloud.data.service.slave.SlaveTableService;
+
+import com.mingcloud.data.service.SysSqlAnalysisService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+
 
 import javax.annotation.Resource;
 import java.io.IOException;
@@ -25,10 +25,16 @@ public class SysSqlAnalysisMapperTest extends DataMigrationToolsApplicationTests
     private SysSqlAnalysisMapper sysSqlAnalysisMapper;
 
     @Resource
-    private MasterDataBaseService masterDataBaseService;
+    private SysSqlAnalysisService sysSqlAnalysisService;
 
-    @Resource
-    private SlaveDataBaseService slaveDataBaseService;
+
+    //private DataBaseConfig dataBaseConfig;
+
+    private String recordSqlTable;
+
+    private String masterDataBase;
+
+    private String slaveDataBase;
 
 
     @Test
@@ -49,13 +55,22 @@ public class SysSqlAnalysisMapperTest extends DataMigrationToolsApplicationTests
 
     @Test
     @DS("master")
+    public void SysSqlAnalysisMapperTestExist() throws IOException {
+        DataBaseEntity entity = new DataBaseEntity();
+        entity.setTableName(recordSqlTable);
+        entity.setDataBaseName(masterDataBase);
+        int existTable = sysSqlAnalysisMapper.existTable(entity);
+        System.out.println("existTable:" + existTable +"recordSqlTable:"+recordSqlTable);
+    }
+
+    @Test
+    @DS("master")
     public void SysSqlAnalysisMapperTestSelectDataInto() throws IOException {
         TableDto dto = new TableDto();
         Map<String, Object> dataBaseMap = new HashMap<>();
-        dto.setNewDataBase(masterDataBaseService.selectDatabaseNameByMySQL());
-        dto.setOldDataBase(slaveDataBaseService.selectDatabaseNameByMySQL());
-        String newDataBase = "`"+ dto.getNewDataBase() +"`";
-        String oldDataBase = "`"+ dto.getOldDataBase() +"`";
+
+        String newDataBase = "`"+ masterDataBase +"`";
+        String oldDataBase = "`"+ slaveDataBase +"`";
 
         dataBaseMap.put("newDataBase", newDataBase);
         dataBaseMap.put("oldDataBase", oldDataBase);
@@ -63,10 +78,11 @@ public class SysSqlAnalysisMapperTest extends DataMigrationToolsApplicationTests
         Map<String, Object> tableMap = new HashMap<>();
         dto.setNewTable("t_user");//2.0
         dto.setOldTable("t_user");//1.0
-        dto.map.put("id", "id");
+
+        dto.columnMap.put("id", "id");
         String name = "`" + "name" + "`";
-        dto.map.put("name", name);
-        dto.map.put("age", "age");
+        dto.columnMap.put("name", name);
+        dto.columnMap.put("age", "age");
 
 
         tableMap.put("newTable", dto.getNewTable());
@@ -75,11 +91,12 @@ public class SysSqlAnalysisMapperTest extends DataMigrationToolsApplicationTests
         Map<String, Object> map = new HashMap<>();
         map.put("dataBaseMap", dataBaseMap);
         map.put("tableMap", tableMap);
-        map.put("columnMap", dto.map);
+        map.put("columnMap", dto.columnMap);
+
         sysSqlAnalysisMapper.selectDataInto(map);
 
 
-        Set<Map.Entry<String, Object>> set = dto.map.entrySet();
+        Set<Map.Entry<String, Object>> set = dto.columnMap.entrySet();
         Iterator<Map.Entry<String, Object>> iterator = set.iterator();
         while (iterator.hasNext()) {
             Map.Entry entry = iterator.next();
@@ -88,6 +105,26 @@ public class SysSqlAnalysisMapperTest extends DataMigrationToolsApplicationTests
             System.out.println("key:" + key + ",value:" + value);
         }
     }
+
+    @Test
+    public void testInit(){
+        recordSqlTable = DataBaseConfig.getRecordSqlTable();
+        System.out.println("recordSqlTable:"+recordSqlTable);
+        DataBaseEntity entity = new DataBaseEntity();
+        entity.setTableName("aaa");
+        entity.setDataBaseName(masterDataBase);
+        sysSqlAnalysisMapper.createTable(entity);
+    }
+    @Test
+    public void testServiceInit(){
+        recordSqlTable = DataBaseConfig.getRecordSqlTable();
+        masterDataBase = DataBaseConfig.getMasterDataBase();
+        DataBaseEntity entity = new DataBaseEntity();
+        entity.setTableName(recordSqlTable);
+        entity.setDataBaseName(masterDataBase);
+        sysSqlAnalysisService.sysSqlAnalysisInit(entity);
+    }
+
 
 
 }

@@ -3,7 +3,6 @@ package com.mingcloud.data.mapper.slave;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.mingcloud.data.entity.DataBaseEntity;
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 

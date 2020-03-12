@@ -3,6 +3,7 @@ package com.mingcloud.data.mapper;
 import com.mingcloud.data.entity.DataBaseEntity;
 import com.mingcloud.data.entity.SysSqlAnalysisEntity;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.dao.DataAccessException;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public interface SysSqlAnalysisMapper {
      * @author simon
      * @date 2020/03/09
      */
-    int dropTable(DataBaseEntity entity);
+    int dropTable(DataBaseEntity entity) throws DataAccessException;
     /**
      * @return int
      * @throws
@@ -61,5 +62,5 @@ public interface SysSqlAnalysisMapper {
      * @author simon
      * @date 2020/03/10
      */
-    void selectDataInto(Object obj);
+    void selectDataInto(Object obj) throws DataAccessException;
 }

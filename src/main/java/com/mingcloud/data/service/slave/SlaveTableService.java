@@ -7,7 +7,12 @@ import java.util.List;
 
 public interface SlaveTableService extends IService<TableEntity> {
     /**
-     * 查找数据库表所有列名称
+     * @return List<TableEntity>
+     * @throws
+     * @Title: findTableStructure
+     * @Description: 获取表所有字段
+     * @author simon
+     * @date 2020/03/03
      */
     List<TableEntity> findTableStructure(Object obj);
 }

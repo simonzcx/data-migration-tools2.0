@@ -49,8 +49,9 @@ public class MybatisInterceptor implements Interceptor {
     @Resource
     private SysSqlAnalysisService sysSqlAnalysisService;
 
-    @Autowired
-    private DataBaseConfig dataBaseConfig;
+    private String recordSqlTable;
+
+    private String masterDataBase;
 
     @Override
     /*
@@ -82,7 +83,7 @@ public class MybatisInterceptor implements Interceptor {
         // 获取节点的配置
         Configuration configuration = mappedStatement.getConfiguration();
 
-        Object returnVal = invocation.proceed();
+        //Object returnVal = invocation.proceed();
 
         //获取sql语句
         String sql = getSql(configuration, boundSql);
@@ -103,15 +104,17 @@ public class MybatisInterceptor implements Interceptor {
             analysis.setParameter(JSON.toJSONString(parameter));
             analysis.setMapper(sqlId);
             analysis.setSqls(sql);
+
             DataBaseEntity entity = new DataBaseEntity();
-            entity.setTableName(dataBaseConfig.getRecordSqlTable());
-            //String databaseName = masterDataBaseService.selectDatabaseNameByMySQL();
-            String databaseName = dataBaseConfig.getMasterDataBaseName();
+            recordSqlTable = DataBaseConfig.getRecordSqlTable();
+            masterDataBase = DataBaseConfig.getMasterDataBase();
+            entity.setTableName(recordSqlTable);
+            entity.setDataBaseName(masterDataBase);
             int existTable = sysSqlAnalysisMapper.existTable(entity);
+
             if (existTable > 0) {
                 sysSqlAnalysisMapper.insertRecordSql(analysis);
             } else {
-                entity.setDataBaseName(databaseName);
                 Boolean init = sysSqlAnalysisService.sysSqlAnalysisInit(entity);
                 if (init) {
                     logger.info("自动初始化，创建sql记录表:{}成功，初始化完成！", entity.getTableName());
@@ -121,9 +124,10 @@ public class MybatisInterceptor implements Interceptor {
                 }
             }
         }
+
         logger.info("Mybatis 拦截器获取SQL:{}", sql);
         // 执行完上面的任务后，不改变原有的sql执行过程
-        return returnVal;
+        return invocation.proceed();
     }
 
     @Override

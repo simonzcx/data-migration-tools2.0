@@ -22,11 +22,6 @@ public class MasterDataBaseServiceImpl
         extends ServiceImpl<MasterDataBaseMapper, DataBaseEntity> implements MasterDataBaseService {
     private static final Logger logger= LoggerFactory.getLogger(MasterDataBaseServiceImpl.class);
 
-    @Autowired
-    private DataBaseConfig dataBaseConfig;
-
-    private String dataBaseName;
-
     @Resource
     private MasterDataBaseMapper masterDataBaseMapper;
 
@@ -40,13 +35,5 @@ public class MasterDataBaseServiceImpl
             logger.error("查询失败!原因是:",e);
         }
         return list;
-    }
-
-    @Override
-    @DS("master")
-    public String selectDatabaseNameByMySQL() throws IOException {
-        dataBaseName = dataBaseConfig.getMasterDataBaseName();
-        dataBaseName = dataBaseName.substring(dataBaseName.lastIndexOf("/") + 1, dataBaseName.lastIndexOf("?"));
-        return dataBaseName;
     }
 }

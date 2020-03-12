@@ -3,6 +3,7 @@ package com.mingcloud.data.service.impl;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.mingcloud.data.common.ServiceResponse;
 import com.mingcloud.data.config.DataBaseConfig;
+import com.mingcloud.data.dto.TableDto;
 import com.mingcloud.data.entity.DataBaseEntity;
 import com.mingcloud.data.entity.SysSqlAnalysisEntity;
 import com.mingcloud.data.mapper.SysSqlAnalysisMapper;
@@ -11,7 +12,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -20,18 +21,26 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @DS("master")
 public class SysSqlAnalysisServiceImpl implements SysSqlAnalysisService {
-    private static final Logger log = LoggerFactory.getLogger(SysSqlAnalysisServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(SysSqlAnalysisServiceImpl.class);
     @Resource
     private SysSqlAnalysisMapper sysSqlAnalysisMapper;
 
-    @Autowired
-    private DataBaseConfig dataBaseConfig;
+    private String filePath = DataBaseConfig.getFilePath();
 
+    private String fileName = DataBaseConfig.getFileName();
+
+    private String recordSqlTable;
+
+    private String masterDataBase;
+
+    private String slaveDataBase;
 
     @Override
     @DS("master")
@@ -44,12 +53,12 @@ public class SysSqlAnalysisServiceImpl implements SysSqlAnalysisService {
             if (dropTable == 0) {
                 sysSqlAnalysisMapper.createTable(entity);
             } else {
-                log.info("删除表：{} 失败！", entity.getTableName());
+                logger.info("删除表：{} 失败！", entity.getTableName());
             }
         } else {
             return false;
         }
-        log.info("初始化成功，新建表：{}", entity.getTableName());
+        logger.info("初始化成功，新建表：{}", entity.getTableName());
         return true;
     }
 
@@ -57,9 +66,8 @@ public class SysSqlAnalysisServiceImpl implements SysSqlAnalysisService {
     @DS("master")
     public void generateSqlFile(DataBaseEntity entity) {
         List<SysSqlAnalysisEntity> entityList = sysSqlAnalysisMapper.selectSqls(entity);
-        String filePath = dataBaseConfig.getFilePath();
-        String fileName = dataBaseConfig.getFileName();
-
+        fileName = DataBaseConfig.getFileName();
+        filePath = DataBaseConfig.getFilePath();
         List<String> sqlList = new ArrayList<>();
         for (SysSqlAnalysisEntity en : entityList) {
             sqlList.add(en.getSqls());
@@ -93,10 +101,10 @@ public class SysSqlAnalysisServiceImpl implements SysSqlAnalysisService {
     @DS("master")
     public ServiceResponse<String> downloadSqlFile(HttpServletRequest request, HttpServletResponse response) throws IOException {
         DataBaseEntity entity = new DataBaseEntity();
-        entity.setTableName(new String("sys_sql_analysis"));
+        recordSqlTable = DataBaseConfig.getRecordSqlTable();
+        entity.setTableName(recordSqlTable);
+
         this.generateSqlFile(entity);
-        String filePath = dataBaseConfig.getFilePath();
-        String fileName = dataBaseConfig.getFileName();
         File file = new File(filePath + fileName);
         response.setCharacterEncoding("utf-8");
 
@@ -127,6 +135,34 @@ public class SysSqlAnalysisServiceImpl implements SysSqlAnalysisService {
         return ServiceResponse.ok("下载成功！");
     }
 
+    @Override
+    @DS("master")
+    public void findDataInsertInto(TableDto dto) throws DataAccessException {
+        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> dataBaseMap = new HashMap<>();
+        Map<String, Object> tableMap = new HashMap<>();
+        masterDataBase = DataBaseConfig.getMasterDataBase();
+        slaveDataBase = DataBaseConfig.getSlaveDataBase();
+        String newDataBase = "`" + masterDataBase + "`";
+        String oldDataBase = "`" + slaveDataBase + "`";
+        dataBaseMap.put("newDataBase", newDataBase);
+        dataBaseMap.put("oldDataBase", oldDataBase);
+        /* ------------------------------------------------------- */
+        tableMap.put("newTable", dto.getNewTable());
+        tableMap.put("oldTable", dto.getOldTable());
+        /* ------------------------------------------------------- */
+        map.put("dataBaseMap", dataBaseMap);
+        map.put("tableMap", tableMap);
+        map.put("columnMap", dto.columnMap);
+
+        sysSqlAnalysisMapper.selectDataInto(map);
+
+    }
+
+    @Override
+    public int dropTable(DataBaseEntity entity) throws DataAccessException {
+        return sysSqlAnalysisMapper.dropTable(entity);
+    }
 
     /**
      * 删除文件或文件夹

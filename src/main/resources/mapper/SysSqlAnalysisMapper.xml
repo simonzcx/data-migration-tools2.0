@@ -58,35 +58,4 @@
         </if>
     </insert>
 
-
-
-
-
-
-
-
-
-
-
-
-    <!--
-    <insert id="selectDataInto" parameterType="java.util.Map">
-        insert into
-        <if test="tableMap.newTable != null and tableMap.newTable != ''">
-            db1.${tableMap.newTable}
-        </if>
-            <foreach collection="columnMap" separator="," item="key" open="(" close=")" index="index">
-                ${key}
-            </foreach>
-        select
-            <foreach collection="columnMap" separator="," index="key" item="value">
-				${value}
-            </foreach>
-        from
-		<if test="tableMap.oldTable != null and tableMap.oldTable != ''">
-			db2.${tableMap.oldTable}
-		</if>
-    </insert>
-	-->
-
 </mapper> 

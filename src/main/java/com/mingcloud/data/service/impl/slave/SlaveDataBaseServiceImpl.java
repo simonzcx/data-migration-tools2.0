@@ -22,10 +22,6 @@ import java.util.List;
 public class SlaveDataBaseServiceImpl
         extends ServiceImpl<SlaveDataBaseMapper, DataBaseEntity> implements SlaveDataBaseService {
     private static final Logger logger= LoggerFactory.getLogger(SlaveDataBaseServiceImpl.class);
-    @Autowired
-    private DataBaseConfig dataBaseConfig;
-
-    private String dataBaseName;
 
     @Resource
     private SlaveDataBaseMapper slaveDataBaseMapper;
@@ -40,12 +36,5 @@ public class SlaveDataBaseServiceImpl
             logger.error("查询失败!原因是:",e);
         }
         return list;
-    }
-
-    @Override
-    public String selectDatabaseNameByMySQL() throws IOException {
-        dataBaseName = dataBaseConfig.getSlaveDataBaseName();
-        dataBaseName = dataBaseName.substring(dataBaseName.lastIndexOf("/")+1, dataBaseName.lastIndexOf("?"));
-        return dataBaseName;
     }
 }
