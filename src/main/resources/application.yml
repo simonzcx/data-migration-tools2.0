@@ -23,10 +23,10 @@ mybatis-plus:
   type-aliases-package: com.mingcloud.data.entity,com.mingcloud.data.entity.master,com.mingcloud.data.entity.slave
 application:
   fileName: dataMigration.sql
-  filePath: F:/work/geely/sql/
+  #filePath: F:/work/geely/sql/
+  filePath: /data/sql/
   #存储 迁移sql的表
   recordSqlTable: sys_sql_analysis
-  #filePath: /data/sql/
 #logging:
 #  level:
 #    com.mingcloud.data.mapper: debug
